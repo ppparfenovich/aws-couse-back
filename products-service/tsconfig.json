@@ -11,7 +11,7 @@
     "outDir": "lib",
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "serverless.ts"],
+  "include": ["src/**/*.ts", "serverless.ts", "src/db/fillingTables.ts"],
   "exclude": [
     "node_modules/**/*",
     ".serverless/**/*",

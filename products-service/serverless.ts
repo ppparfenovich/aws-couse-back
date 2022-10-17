@@ -1,7 +1,9 @@
 import type { AWS } from '@serverless/typescript';
 
+import createProduct from '@functions/createProduct';
 import getProductById from '@functions/getProductById';
-import getProducts from '@functions/getProducts';
+import getProductsList from '@functions/getProductsList';
+import { dynamoDBResources } from 'src/db/configResources';
 
 const serverlessConfiguration: AWS = {
   service: "products-service",
@@ -10,6 +12,7 @@ const serverlessConfiguration: AWS = {
   provider: {
     name: "aws",
     runtime: "nodejs14.x",
+    stage: "dev",
     region: "eu-west-1",
     apiGateway: {
       minimumCompressionSize: 1024,
@@ -19,9 +22,27 @@ const serverlessConfiguration: AWS = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
       NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
     },
+    iam: {
+      role: {
+        statements: [
+          {
+            Effect: "Allow",
+            Action: ["dynamodb:*"],
+            Resource: [
+              "arn:aws:dynamodb:${aws:region}:*:table/products",
+              "arn:aws:dynamodb:${aws:region}:*:table/stocks",
+            ]
+          },
+        ]
+      }
+    }
+
   },
   // import the function via paths
-  functions: { getProductById, getProducts },
+  functions: { createProduct, getProductById, getProductsList },
+  resources: {
+    Resources: dynamoDBResources,
+  },
   package: { individually: true },
   custom: {
     esbuild: {

@@ -1,7 +1,14 @@
 ## Endpoints:
 
-GET - https://szbrgo8eok.execute-api.eu-west-1.amazonaws.com/dev/products/{id}
-GET - https://szbrgo8eok.execute-api.eu-west-1.amazonaws.com/dev/products
+  POST - https://szbrgo8eok.execute-api.eu-west-1.amazonaws.com/dev/products
+  GET - https://szbrgo8eok.execute-api.eu-west-1.amazonaws.com/dev/products/{id}
+  GET - https://szbrgo8eok.execute-api.eu-west-1.amazonaws.com/dev/products
+
+## Functions:
+
+  createProduct: products-service-dev-createProduct (26 kB)
+  getProductById: products-service-dev-getProductById (26 kB)
+  getProductsList: products-service-dev-getProductsList (26 kB)
 
 # Serverless - AWS Node.js Typescript
 
