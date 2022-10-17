@@ -4,7 +4,6 @@ import { Product } from "src/types/product";
 class ProductService {
   private products: Array<Product> = [];
   constructor() {
-    // this.products = products;
     this.products = productsList;
   }
 
