@@ -1,4 +1,4 @@
-import { productsList } from "src/mocks/productsList";
+import { productsList } from "@mocks/productsList";
 import { Product } from "src/types/product";
 
 class ProductService {
