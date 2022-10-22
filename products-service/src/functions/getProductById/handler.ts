@@ -10,6 +10,7 @@ import schema from "./schema";
 
 export const getProductById: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
   try {
+    console.log('Lambda getProductById called!')
     const id = event.pathParameters.id
 
     const [product, stock] = await Promise.all([
