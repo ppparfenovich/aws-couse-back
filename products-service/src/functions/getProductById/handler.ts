@@ -1,26 +1,41 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway";
-import { formatJSONResponse } from "@libs/api-gateway";
+import { 
+  formatJSONErrorResponse,
+  formatJSONSuccessResponse, 
+  ValidatedEventAPIGatewayProxyEvent 
+} from "@libs/api-gateway";
 import { middyfy } from "@libs/lambda";
 import productService from "@services/product-service";
-import createError from "http-errors";
+import stockService from "@services/stock-service";
 import schema from "./schema";
 
-export const getProductById: ValidatedEventAPIGatewayProxyEvent<
-  typeof schema
-> = async (event) => {
-  const {
-    pathParameters: { id },
-  } = event;
+export const getProductById: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+  try {
+    console.log('Lambda getProductById called!')
+    const id = event.pathParameters.id
 
-  const product = productService.getProductById(id);
-
-  if (!product) {
-    throw new createError.NotFound();
+    const [product, stock] = await Promise.all([
+      productService.getProductById(id),
+      stockService.getStockByProductId(id),
+    ])
+  
+    if (!product) {
+      return formatJSONErrorResponse(
+        `Product with id ${id} was not found`,
+        404
+      )
+    }
+  
+    const count = stock?.count || 0
+  
+    return formatJSONSuccessResponse({
+      items: [{
+        ...product,
+        count
+      }],
+    });
+  } catch (err) {
+    return formatJSONErrorResponse(err, 500)
   }
-
-  return formatJSONResponse({
-    items: [product],
-  });
 };
 
 export const main = middyfy(getProductById);

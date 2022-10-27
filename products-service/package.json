@@ -4,7 +4,9 @@
   "description": "Serverless aws-nodejs-typescript template",
   "main": "serverless.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-tables": "aws dynamodb create-table --cli-input-json file://src/db/templates/products.json --region eu-west-1 && aws dynamodb create-table --cli-input-json file://src/db/templates/stocks.json --region eu-west-1",
+    "fill-tables": "node ./src/db/fillingTables"
   },
   "engines": {
     "node": ">=14.15.0"
@@ -14,7 +16,9 @@
     "@middy/http-cors": "^3.5.0",
     "@middy/http-error-handler": "^3.5.0",
     "@middy/http-json-body-parser": "^2.5.3",
-    "http-errors": "^2.0.0"
+    "aws-sdk": "^2.1233.0",
+    "http-errors": "^2.0.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@homeservenow/serverless-event-mocks": "^1.0.6",
@@ -22,6 +26,7 @@
     "@types/aws-lambda": "^8.10.71",
     "@types/jest": "^29.1.2",
     "@types/node": "^14.18.32",
+    "@types/uuid": "^8.3.4",
     "esbuild": "^0.14.11",
     "jest": "^29.1.2",
     "json-schema-to-ts": "^1.5.0",

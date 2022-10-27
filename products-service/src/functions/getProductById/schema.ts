@@ -1,4 +1,9 @@
 export default {
   type: 'object',
-  properties: {},
+  pathParams: {
+    id: { 
+      type: 'string',
+      required: true
+    },
+  },
 } as const;

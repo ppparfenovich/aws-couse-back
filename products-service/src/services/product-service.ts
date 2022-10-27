@@ -1,18 +1,47 @@
-import { productsList } from "@mocks/productsList";
-import { Product } from "src/types/product";
+import { v4 } from "uuid";
+
+import { TABLE_NAMES } from "src/utils/constants";
+import { Product } from "src/utils/types";
+import { dynamoDB } from "src/db/tools";
 
 class ProductService {
-  private products: Array<Product> = [];
-  constructor() {
-    this.products = productsList;
+  public async getProductById(id: string) {
+    const foundProduct = (
+      await dynamoDB
+        .query({
+          TableName: TABLE_NAMES.PRODUCTS,
+          KeyConditionExpression: `id = :id`,
+          ExpressionAttributeValues: { ':id': id },
+        })
+        .promise()
+    ).Items[0]
+
+    return foundProduct as Product
   }
 
-  public getProductById(id: string): Product | undefined {
-    return  this.products.find(item => item.id === id);
+  public async getProducts() {
+    const products = (
+      await dynamoDB
+        .scan({
+          TableName: TABLE_NAMES.PRODUCTS,
+        })
+        .promise()
+    ).Items
+
+    return products as Product[]
   }
 
-  public getProducts() : Array<Product> {
-    return this.products;
+  public async createProduct(product: Partial<Product>): Promise<string> {
+    const id = v4()
+
+    await dynamoDB
+      .put({
+        TableName: TABLE_NAMES.PRODUCTS,
+        Item: { ...product, id },
+      })
+      .promise()
+
+    return id
   }
 }
 
