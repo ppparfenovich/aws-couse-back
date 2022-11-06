@@ -1,5 +1,6 @@
 import type { AWS } from '@serverless/typescript';
 
+import catalogBatchProcess from '@functions/catalogBatchProcess';
 import createProduct from '@functions/createProduct';
 import getProductById from '@functions/getProductById';
 import getProductsList from '@functions/getProductsList';
@@ -21,6 +22,12 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
       NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
+      SQS_URL: {
+        Ref: "SQSQueue",
+      },
+      SNS_ARN: { 
+        Ref: "CreateProductTopic" 
+      },
     },
     iam: {
       role: {
@@ -33,15 +40,56 @@ const serverlessConfiguration: AWS = {
               "arn:aws:dynamodb:${aws:region}:*:table/stocks",
             ]
           },
+          {
+            Effect: "Allow",
+            Action: "sqs:*",
+            Resource: { "Fn::GetAtt": ["SQSQueue", "Arn"] },
+          },
+          {
+            Effect: "Allow",
+            Action: ["sns:*"],
+            Resource: {
+              Ref: "CreateProductTopic",
+            },
+          },
         ]
       }
     }
 
   },
   // import the function via paths
-  functions: { createProduct, getProductById, getProductsList },
+  functions: { 
+    catalogBatchProcess,
+    createProduct, 
+    getProductById, 
+    getProductsList 
+  },
   resources: {
-    Resources: dynamoDBResources,
+    Resources: {
+      ...dynamoDBResources,
+      SQSQueue: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          QueueName: "CatalogItemsQueue",
+        },
+      },
+      CreateProductTopic: {
+        Type: "AWS::SNS::Topic",
+        Properties: {
+          TopicName: "CreateProductTopic",
+        },
+      },
+      CreateProductSubscription: {
+        Type: "AWS::SNS::Subscription",
+        Properties: {
+          Endpoint: "ppparfenovich@gmail.com",
+          Protocol: "email",
+          TopicArn: { 
+            Ref: "CreateProductTopic" 
+          },         
+        },
+      },
+    },
   },
   package: { individually: true },
   custom: {

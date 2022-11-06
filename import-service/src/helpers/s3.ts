@@ -1,10 +1,12 @@
-import S3 from 'aws-sdk/clients/s3';
+import AWS from 'aws-sdk';
 import csvParser from "csv-parser";
 
 const BUCKET = 'aws-shop-import';
+const REGION = 'eu-west-1';
 const EXPIRATION_TIME = 120; // 2 minutes
 
-const s3 = new S3({ region: 'eu-west-1' });
+const s3 = new AWS.S3({ region: REGION });
+const sqs = new AWS.SQS({ region: REGION });
 
 const deleteObject = async (key) => {
   await s3.deleteObject({
@@ -34,7 +36,7 @@ export const getSignedUrl = (name) => {
     ContentType: 'text/csv',
   };
 
-  return s3.getSignedUrl('putObject', params);
+  return s3.getSignedUrlPromise('putObject', params);
 };
 
 export const importFile = (record) => {
@@ -51,6 +53,15 @@ export const importFile = (record) => {
       .pipe(csvParser())
       .on('data', (data) => {
         console.log('Parsed data: ', data);
+        const message = JSON.stringify(data);
+        sqs.sendMessage(
+          {
+            QueueUrl: process.env.SQS_URL,
+            MessageBody: message
+          }, () => {
+            console.log('Send message: ', message)
+          }
+        )
       })
       .on('error', (error) => {
         reject(error);
